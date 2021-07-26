@@ -7,7 +7,8 @@ const {
   rule_list = [/.*/],
   interval = 60 * 1000,
   first_dl_enable = false,
-  aria2: aria2_config
+  aria2_config,
+  aria2_dl_dir,
 } = config
 
 const downloaded_list = []
@@ -16,7 +17,8 @@ let _lastBuildDate
 
 
 const sendToAria2 = async (uri) => {
-  const [guid] = await new Aria2(aria2_config).call('addUri', [uri], {})
+  const options = aria2_dl_dir ? { dir: aria2_dl_dir } : {}
+  const [guid] = await new Aria2(aria2_config).call('addUri', [uri], options)
   console.log('guid:', guid, 'uri:', uri)
 }
 const checkTitleMatch = (title) => {
@@ -42,7 +44,7 @@ const run = async () => {
     console.log('未检测到时间, 跳过时间检查')
   } else {
     if (lastBuildDate === _lastBuildDate) {
-      console.log('未更新:', _lastBuildDate, '==', lastBuildDate)
+      console.log('未更新:', lastBuildDate)
       return
     }
     _lastBuildDate = lastBuildDate
