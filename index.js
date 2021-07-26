@@ -4,8 +4,9 @@ const config = require('./config')
 
 const {
   feed_link,
-  first_dl_enable = false,
   rule_list = [/.*/],
+  interval = 60 * 1000,
+  first_dl_enable = false,
   aria2: aria2_config
 } = config
 
@@ -70,5 +71,5 @@ const run = async () => {
     return
   }
   await run()
-  setInterval(async () => await run(), 10000)
+  setInterval(async () => await run(), interval)
 })()
