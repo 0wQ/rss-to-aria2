@@ -9,6 +9,8 @@ const {
   first_dl_enable = false,
   aria2_config,
   aria2_dl_dir,
+  tg_token,
+  tg_chat_id,
 } = config
 
 const downloaded_list = []
@@ -20,6 +22,20 @@ const sendToAria2 = async (uri) => {
   const options = aria2_dl_dir ? { dir: aria2_dl_dir } : {}
   const [guid] = await new Aria2(aria2_config).call('addUri', [uri], options)
   console.log('guid:', guid, 'uri:', uri)
+}
+const sendMessage = async (text) => {
+  const { tg_token, tg_chat_id } = config
+  if (!tg_token && !tg_chat_id) return
+  const data = {
+    chat_id: tg_chat_id,
+    text: text,
+    disable_web_page_preview: true,
+  }
+  const res = await fetch(`https://api.telegram.org/bot${tg_token}/sendMessage`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+  console.log('sendMessage Status:', await res.status)
 }
 const checkTitleMatch = (title) => {
   for (const rule of rule_list) {
@@ -62,7 +78,10 @@ const run = async () => {
     if (!first_dl_enable && run_count === 1) {
       downloaded_list.push(link)
     } else {
-      !downloaded_list.includes(link) && checkTitleMatch(title) && downloaded_list.push(link) && sendToAria2(link)
+      !downloaded_list.includes(link) && checkTitleMatch(title) && downloaded_list.push(link) && (() => {
+        sendToAria2(link)
+        sendMessage(`Aria2\nTitle: <pre>${title}</pre>\nLink: <pre>${link}</pre>`)
+      })()
     }
   }
 }

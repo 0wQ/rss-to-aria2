@@ -11,4 +11,6 @@ module.exports = {
     path: '/jsonrpc'
   },
   aria2_dl_dir: '',
+  tg_token: '',
+  tg_chat_id: '',
 }
