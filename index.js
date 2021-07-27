@@ -1,5 +1,6 @@
 const Aria2 = require('aria2')
 const Parser = require('rss-parser')
+const fetch = require('node-fetch')
 const config = require('./config')
 
 const {
@@ -24,17 +25,13 @@ const sendToAria2 = async (uri) => {
   console.log('guid:', guid, 'uri:', uri)
 }
 const sendMessage = async (text) => {
-  const { tg_token, tg_chat_id } = config
   if (!tg_token && !tg_chat_id) return
-  const data = {
+  const res = await fetch(`https://api.telegram.org/bot${tg_token}/sendMessage?${new URLSearchParams({
     chat_id: tg_chat_id,
     text: text,
+    parse_mode: 'HTML',
     disable_web_page_preview: true,
-  }
-  const res = await fetch(`https://api.telegram.org/bot${tg_token}/sendMessage`, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  })
+  })}`)
   console.log('sendMessage Status:', await res.status)
 }
 const checkTitleMatch = (title) => {
@@ -80,7 +77,7 @@ const run = async () => {
     } else {
       !downloaded_list.includes(link) && checkTitleMatch(title) && downloaded_list.push(link) && (() => {
         sendToAria2(link)
-        sendMessage(`Aria2\nTitle: <pre>${title}</pre>\nLink: <pre>${link}</pre>`)
+        sendMessage(`Aria2\n<a href="${link}">${title}</a>`)
       })()
     }
   }
