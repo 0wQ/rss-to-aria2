@@ -3,6 +3,8 @@ const Parser = require('rss-parser')
 const fetch = require('node-fetch')
 const config = require('./config')
 
+const parser = new Parser()
+
 const {
   feed_link,
   rule_list = [/.*/],
@@ -17,7 +19,6 @@ const {
 const downloaded_list = []
 let run_count = 0
 let _lastBuildDate
-
 
 const sendToAria2 = async (uri) => {
   const options = aria2_dl_dir ? { dir: aria2_dl_dir } : {}
@@ -42,12 +43,11 @@ const checkTitleMatch = (title) => {
   return false
 }
 
-
 const run = async () => {
   run_count++
   console.log('####################', run_count, '####################')
 
-  const feed = await new Parser().parseURL(feed_link)
+  const feed = await parser.parseURL(feed_link)
   const { title, items } = feed
   const lastBuildDate = feed.lastBuildDate || feed.pubDate || feed.items[0].pubDate || ''
 
@@ -57,11 +57,11 @@ const run = async () => {
     console.log('未检测到时间, 跳过时间检查')
   } else {
     if (lastBuildDate === _lastBuildDate) {
-      console.log('未更新:', lastBuildDate)
+      console.log('时间未更新:', lastBuildDate)
       return
     }
     _lastBuildDate = lastBuildDate
-    console.log('已更新:', _lastBuildDate, '->', lastBuildDate)
+    console.log('时间已更新:', _lastBuildDate, '->', lastBuildDate)
   }
 
   for (const item of items) {
@@ -76,6 +76,7 @@ const run = async () => {
       downloaded_list.push(link)
     } else {
       !downloaded_list.includes(link) && checkTitleMatch(title) && downloaded_list.push(link) && (() => {
+        console.log('↓:', title)
         sendToAria2(link)
         sendMessage(`Aria2\n<a href="${link}">${title}</a>`)
       })()
@@ -88,6 +89,10 @@ const run = async () => {
     console.log('配置缺失')
     return
   }
-  await run()
-  setInterval(async () => await run(), interval)
+  try {
+    await run()
+    setInterval(run, interval)
+  } catch (e) {
+    console.error(e)
+  }
 })()
