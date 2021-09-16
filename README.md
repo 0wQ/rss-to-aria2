@@ -3,8 +3,8 @@
 ## Uagse
 
 ```bash
-git clone https://github.com/0wQ/rss_to_aria2.git
-cd rss_to_aria2
+git clone https://github.com/0wQ/rss-to-aria2.git
+cd rss-to-aria2
 
 cp config_example.js config.js
 vim config.js
