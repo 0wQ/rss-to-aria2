@@ -1,6 +1,6 @@
 # RSS to Aria2
 
-## Uagse
+## Usage
 
 ```bash
 git clone https://github.com/0wQ/rss-to-aria2.git
