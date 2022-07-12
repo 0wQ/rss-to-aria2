@@ -4,7 +4,8 @@ const checkConfig = (config) => {
     aria2Configs = [],
   } = config
 
-  if (feedConfigs.length === 0 || aria2Configs.length === 0) return false
+  if (feedConfigs.length === 0) return false
+  // if (aria2Configs.length === 0) return false
 
   const feedNames = new Set()
   for (const feedConfig of feedConfigs) {

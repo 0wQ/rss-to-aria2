@@ -1,9 +1,21 @@
+import config from '../config.js'
 import sendToAria2 from './sendToAria2.js'
 import sendMessage from './sendMessage.js'
 import * as counter from './counter.js'
 import writeLog from './writeLog.js'
+import { appendFileSync } from 'fs'
 
-export const downloadedHistory = new Set()
+const {
+  isFirstDownload = false,
+  exportFile = '',
+} = config
+
+export const downloadedHistory = {
+  urls: new Set(),
+  titles: new Set(),
+  has: (url, title) => downloadedHistory.urls.has(url) || downloadedHistory.titles.has(title),
+  add: (url, title) => downloadedHistory.urls.add(url) && downloadedHistory.titles.add(title),
+}
 
 export class Downloader {
   #feedName = ''
@@ -15,10 +27,24 @@ export class Downloader {
 
   add(url, title, folder) {
     this.#needToDownload.set(url, [title, folder])
+    downloadedHistory.add(url, title)
+  }
+
+  #exportToFile() {
+    if (this.#needToDownload.size === 0) return
+    let text = ''
+    for (const [url, [title, folder]] of this.#needToDownload) {
+      text += `${title}, ${url}\n`
+    }
+    appendFileSync(exportFile, text)
   }
 
   async download() {
     if (this.#needToDownload.size === 0) return
+
+    exportFile && this.#exportToFile()
+
+    if (!isFirstDownload && counter.get(this.#feedName, 'success') <= 1) return
 
     const msgArray = [
       `<pre>Aria2 - ${this.#feedName}</pre>`,
@@ -26,6 +52,7 @@ export class Downloader {
     ]
 
     for (const [url, [title, folder]] of this.#needToDownload) {
+      counter.add(this.#feedName, 'download')
       let logo = `✅`
       try {
         await sendToAria2(url, folder)
@@ -34,7 +61,6 @@ export class Downloader {
         counter.add(this.#feedName, 'send_to_aria2_fail')
         writeLog(`${this.#feedName} send_to_aria2_fail ${url}`, e)
       }
-      logo === `✅` && counter.add(this.#feedName, 'download')
       msgArray.push(`${logo} <a href="${url}">${title}</a>`)
     }
 

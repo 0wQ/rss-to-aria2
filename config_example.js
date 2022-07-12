@@ -72,6 +72,7 @@ const config = {
   // telegramChatID: '',
   // proxy: 'socks5://localhost:7890',
   // log: './error.log',
+  // exportFile: './download.log',
   // debug: false,
 }
 

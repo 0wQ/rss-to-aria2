@@ -5,6 +5,7 @@ import { posix as path } from 'path'
 const { aria2Configs = [] } = config
 
 export default async (url, folder) => {
+  if (aria2Configs.length === 0) throw new Error('aria2Configs is empty')
   for (const aria2Config of aria2Configs) {
     const fullDir = path.join(aria2Config.downloadDir || '', folder || '')
     const options = aria2Config.downloadDir ? { dir: fullDir } : {}

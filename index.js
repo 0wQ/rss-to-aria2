@@ -7,7 +7,6 @@ import writeLog from './util/writeLog.js'
 
 const {
   feedConfigs = [],
-  isFirstDownload = false,
   defaultInterval = 60 * 1000,
   debug = false,
 } = config
@@ -40,24 +39,21 @@ async function requestFeed(feedLink, feedName, matcherFunction = () => [false, '
   const downloader = new Downloader(feedName)
 
   for (const item of feed.items) {
+    const title = item.title
     const url = item.enclosure?.url || item.link || ''
-    if (!url || downloadedHistory.has(url)) continue
+    if (!url || downloadedHistory.has(url, title)) continue
 
-    const matchResult = matcherFunction(item.title)
+    const matchResult = matcherFunction(title)
     const folder = typeof matchResult === 'string' ? matchResult : ''
     if (!matchResult) continue
+
+    downloader.add(url, title, folder)
 
     if (debug) {
       console.log('matchResult:', matchResult)
       console.log('folder:', folder)
       console.log('item:', item)
     }
-
-    downloadedHistory.add(url)
-
-    if (!isFirstDownload && counter.get(feedName, 'success') <= 1) continue
-
-    downloader.add(url, item.title, folder)
   }
 
   await downloader.download()
