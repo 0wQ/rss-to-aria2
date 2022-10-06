@@ -1,16 +1,24 @@
 {
   "name": "rss-to-aria2",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
   "author": "Mizore",
   "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "start:watch": "nodemon -e js index.js"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
   "dependencies": {
+    "rss-parser": "^3.12.0",
+    "node-fetch": "^3.2.6",
     "aria2": "^4.1.2",
-    "node-fetch": "^2.6.1",
-    "rss-parser": "^3.12.0"
+    "https-proxy-agent": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
   }
 }

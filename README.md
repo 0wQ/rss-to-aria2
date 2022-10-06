@@ -9,6 +9,6 @@ cd rss-to-aria2
 cp config_example.js config.js
 vim config.js
 
-npm i
-npm start
+pnpm i
+pnpm start
 ```
